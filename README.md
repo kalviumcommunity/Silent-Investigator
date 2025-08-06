@@ -78,7 +78,7 @@ download
 content_copy
 expand_less
 
-git clone https://github.com/your-username/silent-investigator.git
+git clone https://github.com/akankshahu/Silent-Investigator.git
 cd silent-investigator
 
 Install dependencies:
@@ -105,7 +105,7 @@ content_copy
 expand_less
 IGNORE_WHEN_COPYING_START
 IGNORE_WHEN_COPYING_END
-python investigate.py --corpus "path/to/your/documents" --report "output/report.md"
+
 🗺️ Roadmap
 
 This project is just the beginning. Here's what's planned for the future:
