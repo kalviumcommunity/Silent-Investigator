@@ -78,7 +78,7 @@ download
 content_copy
 expand_less
 
-git clone https://github.com/akankshahu/Silent-Investigator.git
+git clone 
 cd silent-investigator
 
 Install dependencies:
