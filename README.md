@@ -1,5 +1,11 @@
 # Silent-Investigator
 
+The "Silent Investigator" is a new kind of AI agent that uses a technique called Retrieval-Augmented Generation (RAG). Unlike standard AI models that just answer questions from existing documents, this agent is designed to find information that is deliberately missing or unsaid.
+Retrieval-Augmented Generation (RAG) is a technique that enhances a large language model's (LLM) ability to generate responses by first retrieving relevant information from a separate knowledge base.
+
+My project, "Silent Investigator," is a proactive RAG (Retrieval-Augmented Generation) agent. Its main purpose is to find the truth not just in the available information, but also in the "silent evidence"—the information that is deliberately or unintentionally missing.
+
+
 🕵️‍♀️ The Silent Investigator 🤫
 
 Uncovering the truth in the silence. This next-generation RAG AI agent doesn't just find what's there; it reveals what's deliberately missing.
@@ -111,7 +117,7 @@ IGNORE_WHEN_COPYING_END
 This project is just the beginning. Here's what's planned for the future:
 
 Interactive UI: A web-based interface to visualize the knowledge gaps.
-
+2
 Multi-Lingual Support: Expanding analysis capabilities to more languages.
 
 Real-Time Monitoring: Set up agents to continuously monitor data streams (like news feeds) for emerging silent gaps.
