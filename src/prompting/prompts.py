@@ -1,11 +1,16 @@
 """
 Prompts for Silent Investigator
 - System prompt defines role, task, format, context (RTFC)
-- User prompt template provides the general instruction
+- User prompt templates (general and zero-shot)
 
 Usage:
-from src.prompting.prompts import SYSTEM_PROMPT, build_prompt
+from src.prompting.prompts import SYSTEM_PROMPT, build_prompt, build_zero_shot_prompt
+
+# For a general prompt
 prompt = build_prompt(document_text)
+
+# For a zero-shot specific prompt
+zero_shot_prompt = build_zero_shot_prompt(document_text)
 """
 
 # System prompt using RTFC (Role, Task, Format, Context)
@@ -20,7 +25,7 @@ SYSTEM_PROMPT = (
     "Context: Use ONLY the provided document_text. Do NOT invent facts or fabricate sources. If the document does not contain enough information to decide, mark the relevant item as 'insufficient_information' in required_information and set confidence to 0.0.\n"
 )
 
-# General user prompt template (RTFC applied in the user-level instruction)
+# General user prompt template
 USER_PROMPT_TEMPLATE = (
     "Document:\n{document_text}\n\n"
     "Instruction (RTFC):\n"
@@ -32,17 +37,33 @@ USER_PROMPT_TEMPLATE = (
     "If nothing is missing, return missing_fields as an empty list."
 )
 
+# Zero-shot user prompt: explicit about zero-shot (no examples provided)
+ZERO_SHOT_USER_PROMPT_TEMPLATE = (
+    "ZERO-SHOT INSTRUCTION:\n"
+    "You will analyze the document below and return the requested structured JSON. Do NOT use any examples — this is zero-shot.\n\n"
+    "Document:\n{document_text}\n\n"
+    "Task: Identify missing or incomplete information. For each missing item return:\n"
+    "  - name: short identifier of the missing info (string)\n"
+    "  - why_missing: brief rationale why it is missing or ambiguous (string)\n"
+    "  - evidence_span: exact quote or nearest sentence from the document that indicates the gap (string or null)\n"
+    "  - required_information: what must be provided to consider this present (string, or 'insufficient_information')\n"
+    "  - priority: one of [low, medium, high]\n"
+    "  - confidence: float between 0.0 and 1.0\n\n"
+    "Format: Return ONLY a JSON object with keys: missing_fields, summary, remediation_steps.\n"
+    "Important constraints:\n"
+    "  - Use only the document_text; do not hallucinate sources or values.\n"
+    "  - Keep the JSON stable (same schema) so it can be parsed by downstream tools.\n"
+    "Return up to {max_items} items."
+)
+
 
 def build_prompt(document_text: str, max_items: int = 10) -> str:
-    """Builds the final prompt string to send to an LLM.
-.
-    Parameters:
-        document_text: The text to analyze.
-        max_items: The maximum number of missing items to request.
-    Returns:
-        The full prompt string.
-    """
+    """Builds the general prompt string."""
     return USER_PROMPT_TEMPLATE.format(document_text=document_text, max_items=max_items)
+
+def build_zero_shot_prompt(document_text: str, max_items: int = 10) -> str:
+    """Builds the final prompt string for zero-shot evaluation."""
+    return ZERO_SHOT_USER_PROMPT_TEMPLATE.format(document_text=document_text, max_items=max_items)
 
 
 # Example JSON schema (for implementers/tests):
