@@ -35,7 +35,7 @@ USER_PROMPT_TEMPLATE = (
 
 def build_prompt(document_text: str, max_items: int = 10) -> str:
     """Builds the final prompt string to send to an LLM.
-
+.
     Parameters:
         document_text: The text to analyze.
         max_items: The maximum number of missing items to request.
