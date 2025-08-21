@@ -139,3 +139,75 @@ def build_one_shot_prompt(document_text: str) -> str:
 # Previous functions for zero-shot and general prompts can also be kept for comparison
 # ZERO_SHOT_USER_PROMPT_TEMPLATE = (...)
 # def build_zero_shot_prompt(...)
+"""
+Prompts for Silent Investigator
+- System prompt defines the AI's core role and rules.
+- User prompt templates are provided for zero-shot, one-shot, and multi-shot (few-shot) prompting.
+
+Usage:
+from src.prompting.prompts import build_zero_shot_prompt, build_one_shot_prompt, build_multi_shot_prompt
+
+# Choose the function that best fits the complexity of your task.
+# For complex tasks, multi-shot is often the most reliable.
+prompt = build_multi_shot_prompt(document_text)
+"""
+
+# System prompt using RTFC (Role, Task, Format, Context)
+SYSTEM_PROMPT = (
+    "You are Silent Investigator — an automated document investigator.\n"
+    "Role: Expert analyst that inspects documents for missing, incomplete, or inconsistent information.\n"
+    "Task: Given a document, identify any missing required fields or facts, explain why each item is missing, point to evidence spans in the text (if any), estimate confidence, and recommend concrete remediation steps.\n"
+    "Format: Return ONLY a JSON object (no surrounding commentary) with the following keys:\n"
+    "  - missing_fields: list of objects with {name, why_missing, evidence_span, required_information, priority, confidence} \n"
+    "  - summary: short plain-text summary of the overall issues (1-2 sentences)\n"
+    "  - remediation_steps: ordered list of concrete next steps to fix gaps\n"
+    "Context: Use ONLY the provided document_text. Do NOT invent facts or fabricate sources. If the document does not contain enough information to decide, mark the relevant item as 'insufficient_information' in required_information and set confidence to 0.0.\n"
+)
+
+# Multi-shot user prompt: provides multiple, varied examples
+MULTI_SHOT_USER_PROMPT_TEMPLATE = (
+    "MULTI-SHOT INSTRUCTION: Analyze the document in the 'Your Task' section by learning from the multiple examples provided below. Notice how the task applies to different contexts.\n\n"
+    "### Example 1 (Medical Context) ###\n"
+    "Document:\n"
+    "Patient Name: Jane Smith. The patient presents with a persistent cough and fever. Temperature is 101.2°F. Plan: Prescribe antibiotics and recommend rest.\n\n"
+    "JSON Output:\n"
+    "{\n"
+    '  "missing_fields": [\n'
+    '    {\n'
+    '      "name": "Patient Date of Birth",\n'
+    '      "why_missing": "The document identifies the patient by name but does not include their date of birth or age, a critical identifier.",\n'
+    '      "evidence_span": "Patient Name: Jane Smith.",\n'
+    '      "required_information": "Patient date of birth in YYYY-MM-DD format or their age.",\n'
+    '      "priority": "high",\n'
+    '      "confidence": 0.98\n'
+    '    }\n'
+    '  ],\n'
+    '  "summary": "The patient record is missing the date of birth, a key identifier.",\n'
+    '  "remediation_steps": ["Contact the patient or referring office to obtain the date of birth."]\n'
+    "}\n\n"
+    "### Example 2 (Business Context) ###\n"
+    "Document:\n"
+    "To: Team\nFrom: Alex\nSubject: Project Phoenix Update\n\nThe team has completed the UI mockups and the API is now in testing. We are on track to meet the Q3 deadline. Let's sync next week.\n\n"
+    "JSON Output:\n"
+    "{\n"
+    '  "missing_fields": [\n'
+    '    {\n'
+    '      "name": "Project Budget Status",\n'
+    '      "why_missing": "The project update mentions progress and deadlines but completely omits any reference to the budget, spending, or financial status.",\n'
+    '      "evidence_span": "We are on track to meet the Q3 deadline.",\n'
+    '      "required_information": "A statement on current budget utilization (e.g., on-budget, over-budget, under-budget).",\n'
+    '      "priority": "medium",\n'
+    '      "confidence": 0.95\n'
+    '    }\n'
+    '  ],\n'
+    '  "summary": "The project status update is missing any mention of the budget.",\n'
+    '  "remediation_steps": ["Reply to the email asking for a clarification on the project budget status."]\n'
+    "}\n\n"
+    "### Your Task ###\n"
+    "Document:\n{document_text}\n\n"
+    "JSON Output:\n"
+)
+
+def build_multi_shot_prompt(document_text: str) -> str:
+    """Builds the final prompt string using multiple examples (few-shot)."""
+    return MULTI_SHOT_USER_PROMPT_TEMPLATE.format(document_text=document_text)
