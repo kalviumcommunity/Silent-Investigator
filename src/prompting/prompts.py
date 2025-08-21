@@ -319,3 +319,47 @@ print(build_dynamic_prompt(short_doc))
 print("\n" + "="*50 + "\n")
 print("--- DYNAMIC PROMPT FOR LONG MEDICAL DOCUMENT (Chooses MULTI-SHOT with relevant example) ---")
 print(build_dynamic_prompt(long_doc))
+import json
+
+# Chain-of-Thought (CoT) User Prompt: Teaches the model to "think step-by-step"
+COT_USER_PROMPT_TEMPLATE = (
+    "INSTRUCTION: Analyze the document in the 'Your Task' section. First, follow the chain of thought from the example to reason about the document. Second, produce the final JSON output.\n\n"
+    "### Example ###\n"
+    "Document:\n"
+    "To: Project Leads\n"
+    "From: Sarah Director\n"
+    "Subject: Q3 Project Review\n\n"
+    "Hi Team,\n"
+    "Just a reminder that the Q3 project review is next Friday. Please come prepared to discuss your team's progress against the goals we set out in July. We need to ensure we are on track.\n\n"
+    "JSON Output:\n"
+    "{\n"
+    '  "chain_of_thought": "1. **Goal:** The user wants me to act as an investigator and find missing information in the document.\\n2. **Analyze Document:** The document is a project review reminder email. It mentions a meeting, a topic (Q3 progress), and a timeline (next Friday, referencing July goals).\\n3. **Identify Key Entities:** The key entities are the meeting, the project, and the timeline.\\n4. **Scan for Missing Information:** While the email sets a date (next Friday), it is ambiguous. It lacks a specific calendar date (e.g., Aug 29, 2025) and a precise time (e.g., 10:00 AM PST). Stakeholders do not know exactly when to meet.\\n5. **Formulate the Finding:** The critical missing pieces are the specific date and time of the meeting.\\n6. **Construct JSON:** I will create a `missing_fields` entry for `Meeting Date and Time`, explain why it is missing, provide the evidence span, and suggest remediation.",\n'
+    '  "final_json": {\n'
+    '    "missing_fields": [\n'
+    '      {\n'
+    '        "name": "Meeting Date and Time",\n'
+    '        "why_missing": "The reminder mentions `next Friday` which is ambiguous and lacks a specific calendar date and time for the meeting.",\n'
+    '        "evidence_span": "the Q3 project review is next Friday",\n'
+    '        "required_information": "A specific date (e.g., 2025-08-29) and time (e.g., 10:00 AM PST) for the review.",\n'
+    '        "priority": "high",\n'
+    '        "confidence": 0.99\n'
+    '      }\n'
+    '    ],\n'
+    '    "summary": "The project review announcement is missing a specific date and time.",\n'
+    '    "remediation_steps": ["Reply to the sender asking for the exact calendar date and time of the meeting."]\n'
+    '  }\n'
+    "}\n\n"
+    "### Your Task ###\n"
+    "Document:\n{document_text}\n\n"
+    "JSON Output:\n"
+)
+
+def build_cot_prompt(document_text: str) -> str:
+    """Builds a prompt that encourages Chain-of-Thought reasoning."""
+    return COT_USER_PROMPT_TEMPLATE.format(document_text=document_text)
+
+# --- Example Usage ---
+my_document = "Please approve the attached PO for the new server hardware. We need it to scale the main application. The vendor is TechCorp."
+
+print("--- CHAIN-OF-THOUGHT PROMPT ---")
+print(build_cot_prompt(my_document))
