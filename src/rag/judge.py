@@ -30,7 +30,7 @@ def judge_compare(predicted: Dict[str, Any], expected: Dict[str, Any]) -> Dict[s
     exp_names = _get_names(expected)
     pred_names = _get_names(predicted)
 
-    max_points = len(exp_names) * 1.0 + 0.2  # 1.0 per expected item (0.6+0.2) + 0.2 for summary/remediation
+    max_points = len(exp_names) * 1.0 + 0.2  # 1.0 per expected item (0.6+0.2) + 0.2 for summary/remediation.
     points = 0.0
     details = []
 
